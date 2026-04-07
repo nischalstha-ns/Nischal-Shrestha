@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  --primary: #4f46e5;
+}
+
+/* Custom utility overrides for dynamic primary color */
+.bg-indigo-600 { background-color: var(--primary) !important; }
+.text-indigo-600 { color: var(--primary) !important; }
+.border-indigo-600 { border-color: var(--primary) !important; }
+.bg-indigo-50 { background-color: color-mix(in srgb, var(--primary) 10%, white) !important; }
+.text-indigo-50 { color: color-mix(in srgb, var(--primary) 10%, white) !important; }
+.shadow-indigo-100 { --tw-shadow-color: color-mix(in srgb, var(--primary) 20%, white) !important; }
+
+html {
+  transition: font-size 0.2s ease-in-out;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+@layer utilities {
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

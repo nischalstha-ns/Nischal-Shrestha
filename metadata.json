@@ -1,0 +1,5 @@
+{
+  "name": "SaaS POS System",
+  "description": "A full-stack, offline-first Point of Sale system with cloud sync, PWA support, and admin dashboard.",
+  "requestFramePermissions": []
+}
