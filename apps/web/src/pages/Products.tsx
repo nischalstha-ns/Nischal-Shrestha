@@ -170,93 +170,163 @@ export default function ProductsPage() {
           <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex-1 flex flex-col">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                  <th className="px-6 py-4">{t('Product', 'उत्पादन')}</th>
-                  <th className="px-6 py-4">{t('Category', 'वर्ग')}</th>
-                  <th className="px-6 py-4">{t('Price', 'मूल्य')}</th>
-                  <th className="px-6 py-4">{t('Stock', 'स्टक')}</th>
-                  <th className="px-6 py-4 text-right">{t('Actions', 'कार्यहरू')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 overflow-hidden">
-                          {product.image ? (
-                            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <Package className="w-5 h-5" />
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex-1 flex flex-col">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider">
+                    <th className="px-6 py-4">{t('Product', 'उत्पादन')}</th>
+                    <th className="px-6 py-4">{t('Category', 'वर्ग')}</th>
+                    <th className="px-6 py-4">{t('Price', 'मूल्य')}</th>
+                    <th className="px-6 py-4">{t('Stock', 'स्टक')}</th>
+                    <th className="px-6 py-4 text-right">{t('Actions', 'कार्यहरू')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredProducts.map((product) => (
+                    <tr key={product.id} className="hover:bg-gray-50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 overflow-hidden">
+                            {product.image ? (
+                              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Package className="w-5 h-5" />
+                            )}
+                          </div>
+                          <span className="font-bold text-gray-900">{product.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">
+                          {categories.find(c => c.id === product.categoryId)?.name || 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-bold text-indigo-600">
+                        {format(product.price)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span className={`font-bold ${product.stock <= product.minStock ? 'text-amber-600' : 'text-gray-900'}`}>
+                            {product.stock}
+                          </span>
+                          {product.stock <= product.minStock && (
+                            <AlertCircle className="w-4 h-4 text-amber-500" />
                           )}
                         </div>
-                        <span className="font-bold text-gray-900">{product.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">
-                        {categories.find(c => c.id === product.categoryId)?.name || 'Unknown'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-bold text-indigo-600">
-                      {format(product.price)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <span className={`font-bold ${product.stock <= product.minStock ? 'text-amber-600' : 'text-gray-900'}`}>
-                          {product.stock}
-                        </span>
-                        {product.stock <= product.minStock && (
-                          <AlertCircle className="w-4 h-4 text-amber-500" />
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => {
-                            setAdjustingProduct(product);
-                            setIsAdjustModalOpen(true);
-                          }}
-                          className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
-                          title="Adjust Stock"
-                        >
-                          <TrendingUp className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => openModal(product)}
-                          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (confirm('Are you sure you want to delete this product?')) {
-                              deleteProduct(product.id);
-                            }
-                          }}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {filteredProducts.length === 0 && (
-            <div className="flex-1 flex flex-col items-center justify-center py-20 text-gray-400">
-              <Package className="w-16 h-16 mb-4 opacity-10" />
-              <p className="font-medium">No products found</p>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => {
+                              setAdjustingProduct(product);
+                              setIsAdjustModalOpen(true);
+                            }}
+                            className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
+                            title="Adjust Stock"
+                          >
+                            <TrendingUp className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => openModal(product)}
+                            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm('Are you sure you want to delete this product?')) {
+                                deleteProduct(product.id);
+                              }
+                            }}
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-        </div>
+            {filteredProducts.length === 0 && (
+              <div className="flex-1 flex flex-col items-center justify-center py-20 text-gray-400">
+                <Package className="w-16 h-16 mb-4 opacity-10" />
+                <p className="font-medium">No products found</p>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {filteredProducts.map((product) => (
+              <div key={product.id} className="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 overflow-hidden flex-shrink-0">
+                    {product.image ? (
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Package className="w-6 h-6" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-black text-gray-900 truncate">{product.name}</h3>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      {categories.find(c => c.id === product.categoryId)?.name || 'Unknown'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-black text-indigo-600">{format(product.price)}</p>
+                    <div className="flex items-center justify-end gap-1">
+                      <span className={`text-xs font-black ${product.stock <= product.minStock ? 'text-amber-600' : 'text-gray-900'}`}>
+                        {product.stock}
+                      </span>
+                      {product.stock <= product.minStock && (
+                        <AlertCircle className="w-3 h-3 text-amber-500" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-4 border-t border-gray-50">
+                  <button
+                    onClick={() => {
+                      setAdjustingProduct(product);
+                      setIsAdjustModalOpen(true);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-50 text-amber-600 text-xs font-black uppercase tracking-widest"
+                  >
+                    <TrendingUp className="w-4 h-4" /> Stock
+                  </button>
+                  <button
+                    onClick={() => openModal(product)}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest"
+                  >
+                    <Edit2 className="w-4 h-4" /> Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm('Are you sure you want to delete this product?')) {
+                        deleteProduct(product.id);
+                      }
+                    }}
+                    className="p-3 rounded-xl bg-red-50 text-red-600"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {filteredProducts.length === 0 && (
+              <div className="py-20 text-center text-gray-400">
+                <Package className="w-16 h-16 mx-auto mb-4 opacity-10" />
+                <p className="font-medium">No products found</p>
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       {/* Modal */}

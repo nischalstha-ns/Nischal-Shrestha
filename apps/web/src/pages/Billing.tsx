@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePOSStore } from '../store';
-import { ShoppingCart, Package, Loader2, Search, Trash2, Plus, Minus, Percent, DollarSign } from 'lucide-react';
-import { formatCurrency } from '@shared/utils';
+import { ShoppingCart, Package, Loader2, Search, Trash2, Plus, Minus, Percent, DollarSign, Check } from 'lucide-react';
+import { formatCurrency, cn } from '@shared/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProducts, useCategories, useSales, useSettings } from '../hooks/usePOS';
 import type { Order, OrderItem } from '@shared/types';
@@ -126,32 +126,48 @@ export default function BillingPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-6">
           {productsLoading ? (
             <div className="h-full flex items-center justify-center">
               <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {filteredProducts.map((product) => (
                 <motion.button
                   key={product.id}
                   whileTap={{ scale: 0.95 }}
+                  whileHover={{ y: -4 }}
                   onClick={() => handleAddToCart(product)}
-                  className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all text-left flex flex-col relative group"
+                  className="bg-white p-4 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all text-left flex flex-col relative group overflow-hidden"
                 >
                   {product.stock <= product.minStock && (
-                    <span className="absolute top-2 right-2 bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-1 rounded-full border border-amber-200">
-                      Low Stock
-                    </span>
+                    <div className="absolute top-3 right-3 z-10">
+                      <div className="bg-amber-500 text-white text-[9px] font-black px-2 py-1 rounded-lg shadow-lg shadow-amber-500/20 uppercase tracking-wider">
+                        Low Stock
+                      </div>
+                    </div>
                   )}
-                  <div className="aspect-square bg-gray-50 rounded-xl mb-3 flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
-                    <Package className="w-10 h-10 text-gray-300 group-hover:text-indigo-400" />
+                  <div className="aspect-square bg-gray-50 rounded-2xl mb-4 flex items-center justify-center group-hover:bg-indigo-50 transition-colors overflow-hidden relative">
+                    {product.image ? (
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                    ) : (
+                      <Package className="w-10 h-10 text-gray-200 group-hover:text-indigo-200 transition-colors" />
+                    )}
+                    <div className="absolute inset-0 bg-indigo-600/0 group-hover:bg-indigo-600/5 transition-colors" />
                   </div>
-                  <h3 className="font-bold text-gray-900 line-clamp-1 mb-1">{product.name}</h3>
-                  <div className="flex items-center justify-between mt-auto">
-                    <span className="text-indigo-600 font-extrabold">{format(product.price)}</span>
-                    <span className="text-[10px] font-medium text-gray-400">Stock: {product.stock}</span>
+                  <div className="flex-1 flex flex-col">
+                    <h3 className="font-black text-gray-900 line-clamp-1 mb-1 group-hover:text-indigo-600 transition-colors">{product.name}</h3>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+                      {categories.find(c => c.id === product.categoryId)?.name || 'General'}
+                    </p>
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
+                      <span className="text-indigo-600 font-black text-lg">{format(product.price)}</span>
+                      <div className="flex items-center gap-1">
+                        <div className={cn("w-1.5 h-1.5 rounded-full", product.stock > 0 ? "bg-green-500" : "bg-red-500")} />
+                        <span className="text-[10px] font-black text-gray-400 uppercase">{product.stock}</span>
+                      </div>
+                    </div>
                   </div>
                 </motion.button>
               ))}
@@ -161,63 +177,86 @@ export default function BillingPage() {
       </div>
 
       {/* Cart Sidebar */}
-      <aside className="w-full md:w-[400px] bg-white border-l flex flex-col shadow-2xl z-20">
-        <div className="p-4 border-b flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 text-indigo-600" />
-            <h2 className="font-bold text-lg">Current Order</h2>
+      <aside className="w-full md:w-[420px] bg-white border-l flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.05)] z-20">
+        <div className="p-6 border-b flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-10">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-600">
+              <ShoppingCart className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="font-black text-gray-900 tracking-tight">Current Order</h2>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{cart.length} items selected</p>
+            </div>
           </div>
           <button 
             onClick={() => clearCart()}
-            className="text-gray-400 hover:text-red-500 transition-colors"
+            className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
           >
             <Trash2 className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-none">
           <AnimatePresence mode="popLayout">
             {cart.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 py-12">
-                <ShoppingCart className="w-16 h-16 mb-4 opacity-10" />
-                <p className="font-medium">Your cart is empty</p>
-                <p className="text-xs">Select products to start billing</p>
+              <div className="h-full flex flex-col items-center justify-center text-gray-300 py-12">
+                <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+                  <ShoppingCart className="w-10 h-10 opacity-20" />
+                </div>
+                <p className="font-black text-gray-400 uppercase tracking-widest text-sm">Cart is empty</p>
+                <p className="text-xs font-medium mt-1">Select products to start</p>
               </div>
             ) : (
               cart.map((item) => (
                 <motion.div
                   key={item.product.id}
                   layout
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="bg-gray-50 p-3 rounded-xl border border-gray-100"
+                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, x: 20 }}
+                  className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold text-gray-900 line-clamp-1">{item.product.name}</h4>
-                    <span className="font-bold text-indigo-600">
-                      {format(item.product.price * item.quantity)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-1">
-                      <button 
-                        onClick={() => updateCartQuantity(item.product.id, -1)}
-                        className="p-1 hover:bg-gray-100 rounded text-gray-500"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="w-8 text-center font-bold text-sm">{item.quantity}</span>
-                      <button 
-                        onClick={() => updateCartQuantity(item.product.id, 1)}
-                        className="p-1 hover:bg-gray-100 rounded text-gray-500"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
+                  <div className="flex gap-4">
+                    <div className="w-16 h-16 bg-gray-50 rounded-2xl flex-shrink-0 overflow-hidden">
+                      {item.product.image ? (
+                        <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package className="w-6 h-6 text-gray-200" />
+                        </div>
+                      )}
                     </div>
-                    <span className="text-xs text-gray-400">
-                      {format(item.product.price)} / unit
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-1">
+                        <h4 className="font-black text-gray-900 truncate pr-2">{item.product.name}</h4>
+                        <span className="font-black text-indigo-600 whitespace-nowrap">
+                          {format(item.product.price * item.quantity)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 border border-gray-100">
+                          <button 
+                            onClick={() => updateCartQuantity(item.product.id, -1)}
+                            className="w-8 h-8 flex items-center justify-center hover:bg-white hover:text-indigo-600 rounded-lg text-gray-400 transition-all active:scale-90"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="w-8 text-center font-black text-gray-900 text-sm">{item.quantity}</span>
+                          <button 
+                            onClick={() => updateCartQuantity(item.product.id, 1)}
+                            className="w-8 h-8 flex items-center justify-center hover:bg-white hover:text-indigo-600 rounded-lg text-gray-400 transition-all active:scale-90"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <button 
+                          onClick={() => removeFromCart(item.product.id)}
+                          className="text-[10px] font-black text-red-400 uppercase tracking-widest hover:text-red-600 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               ))
@@ -225,71 +264,90 @@ export default function BillingPage() {
           </AnimatePresence>
         </div>
 
-        <div className="p-4 bg-gray-50 border-t space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-gray-500">
+        <div className="p-6 bg-gray-50/50 border-t border-gray-100 space-y-6">
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm font-bold text-gray-400 uppercase tracking-widest">
               <span>{t('Subtotal', 'उप-कुल')}</span>
-              <span>{format(subtotal)}</span>
+              <span className="text-gray-900">{format(subtotal)}</span>
             </div>
 
             {discountAmount > 0 && (
-              <div className="flex justify-between text-sm text-amber-600">
+              <div className="flex justify-between text-sm font-bold text-amber-500 uppercase tracking-widest">
                 <span>{t('Discount', 'छुट')}</span>
                 <span>-{format(discountAmount)}</span>
               </div>
             )}
 
-            <div className="flex justify-between text-sm text-gray-500 items-center">
+            <div className="flex justify-between text-sm font-bold text-gray-400 uppercase tracking-widest items-center">
               <div className="flex items-center gap-2">
                 <span>{t('Tax', 'कर')} ({settings.taxRate}%)</span>
                 <button 
                   onClick={() => updateSettings({ taxEnabled: !settings.taxEnabled })}
-                  className={`w-8 h-4 rounded-full transition-all relative ${settings.taxEnabled ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                  className={cn(
+                    "w-10 h-5 rounded-full transition-all relative",
+                    settings.taxEnabled ? 'bg-indigo-600' : 'bg-gray-300'
+                  )}
                 >
-                  <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${settings.taxEnabled ? 'left-4.5' : 'left-0.5'}`} />
+                  <div className={cn(
+                    "absolute top-1 w-3 h-3 bg-white rounded-full transition-all",
+                    settings.taxEnabled ? 'left-6' : 'left-1'
+                  )} />
                 </button>
               </div>
-              <span>{format(taxAmount)}</span>
+              <span className="text-gray-900">{format(taxAmount)}</span>
             </div>
             
-            <div className="flex items-center gap-2">
-              <div className="flex-1 flex items-center bg-white border border-gray-200 rounded-lg px-3 py-1">
+            <div className="flex items-center gap-3 pt-2">
+              <div className="flex-1 flex items-center bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
                 {discountType === 'percentage' ? <Percent className="w-4 h-4 text-gray-400 mr-2" /> : <DollarSign className="w-4 h-4 text-gray-400 mr-2" />}
                 <input
                   type="number"
                   placeholder={t('Discount', 'छुट')}
-                  className="w-full text-sm outline-none font-medium"
+                  className="w-full text-sm outline-none font-black text-gray-900"
                   value={discount || ''}
                   onChange={(e) => setDiscount(Number(e.target.value))}
                 />
               </div>
-              <div className="flex bg-white border border-gray-200 rounded-lg p-1">
+              <div className="flex bg-white border border-gray-100 rounded-2xl p-1.5 shadow-sm">
                 <button
                   onClick={() => setDiscountType('flat')}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${discountType === 'flat' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500'}`}
+                  className={cn(
+                    "w-10 h-10 flex items-center justify-center rounded-xl text-sm font-black transition-all",
+                    discountType === 'flat' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-gray-400 hover:text-gray-600'
+                  )}
                 >
                   $
                 </button>
                 <button
                   onClick={() => setDiscountType('percentage')}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${discountType === 'percentage' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500'}`}
+                  className={cn(
+                    "w-10 h-10 flex items-center justify-center rounded-xl text-sm font-black transition-all",
+                    discountType === 'percentage' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-gray-400 hover:text-gray-600'
+                  )}
                 >
                   %
                 </button>
               </div>
             </div>
 
-            <div className="flex justify-between items-center text-xl font-black pt-2 border-t border-gray-200">
-              <span>{t('Grand Total', 'कुल जम्मा')}</span>
-              <span className="text-indigo-600">{format(total)}</span>
+            <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+              <div>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">{t('Grand Total', 'कुल जम्मा')}</p>
+                <span className="text-3xl font-black text-indigo-600 tracking-tighter">{format(total)}</span>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Items</p>
+                <span className="text-xl font-black text-gray-900">{cart.reduce((sum, i) => sum + i.quantity, 0)}</span>
+              </div>
             </div>
           </div>
 
           <button
             onClick={handleCheckout}
             disabled={cart.length === 0}
-            className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl shadow-indigo-100 active:scale-[0.98]"
+            className="w-full bg-indigo-600 text-white py-5 rounded-[2rem] font-black text-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-2xl shadow-indigo-200 active:scale-[0.98] flex items-center justify-center gap-3"
           >
+            <Check className="w-6 h-6" />
             {t('Complete Sale', 'बिक्री पूरा गर्नुहोस्')}
           </button>
         </div>
